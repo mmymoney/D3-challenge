@@ -75,7 +75,7 @@ d3.csv("./assets/data/data.csv").then(function(statedata) {
     .data(statedata)
     .enter()
     .append("text").attr('style', '')
-    .text(function(d) { return d.abbr; })
+    .text(d => d.abbr)
     .attr("x", d => xLinearScale(d.poverty))
     .attr("y", d => yLinearScale(d.healthcare))
     .attr("fill", "white")
