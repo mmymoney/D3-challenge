@@ -38,7 +38,7 @@ d3.csv("./assets/data/data.csv").then(function(statedata) {
     // Step 2: Create scale functions
     // ==============================
     var xLinearScale = d3.scaleLinear()
-      .domain([8, d3.max(statedata, d => d.poverty)])
+      .domain([5, d3.max(statedata, d => d.poverty)])
       .range([0, width]);
 
     var yLinearScale = d3.scaleLinear()
@@ -61,38 +61,59 @@ d3.csv("./assets/data/data.csv").then(function(statedata) {
 
     // Step 5: Create Circles
     // ==============================
-    var circlesGroup = chartGroup.selectAll("circle")
-    .data(statedata)
-    .enter()
+    var theCircles = svg.selectAll("g theCircles").data(statedata).enter();
+    theCircles
     .append("circle")
     .attr("cx", d => xLinearScale(d.poverty))
     .attr("cy", d => yLinearScale(d.healthcare))
-    .attr("r", "15")
-    .attr("fill", "red")
-    .attr("opacity", ".5")
+    .attr("r", "20")
+    .attr("class", function(d) {
+      return "stateCircle " + d.abbr
+    })
+    .on("mouseover", function(d) {
+      toolTip.show(d, this)
+      d3.select(this).style("stroke", "#323232")
+    })
+      .on("mouseout", function(d) {
+      toolTip.hide(d, this);
+      d3.select(this).style("stroke", "#e3e3e3");
+    });
 
-    var textGroup = chartGroup.selectAll("text")
-    .data(statedata)
-    .enter()
-    .append("text").attr('style', '')
+
+
+    theCircles
+    .append("text")
+    .attr('style', '')
     .text(d => d.abbr)
     .attr("x", d => xLinearScale(d.poverty))
     .attr("y", d => yLinearScale(d.healthcare))
     .attr("fill", "white")
     .attr("opacity", ".75")
+    .attr("class", "stateText")
+    .on("mouseover", function(d) {
+      toolTip,show(d)
+      d3.select("."+ d.abbr).style("stroke", "#323232");
+    })
+    .on("mouseout", function(d) {
+      toolTip.hide(d);
+      d3.select("." + d.abbr).style("stroke", "#E3E3E3");
+    });
 
     // Step 6: Initialize tool tip
     // ==============================
-    // var toolTip = d3.toolTip()
-    //   .attr("class", "tooltip")
-    //   .offset([80, -60])
-    //   .html(function(d) {
-    //     return (`${d.abbr}`);
-    //   });
+    var toolTip = d3.tip()
+      .attr("class", "tooltip")
+      .offset([80, -60])
+      .html(function(d) {
+        return (`${d.state}
+        "Poverty: "${d.poverty}
+        "Healthcare: "${d.healthcare}`);
+      });
+
 
     // Step 7: Create tooltip in the chart
     // ==============================
-    // chartGroup.call(toolTip);
+    chartGroup.call(toolTip);
 
     
 
@@ -107,7 +128,8 @@ d3.csv("./assets/data/data.csv").then(function(statedata) {
       .attr("x", 0 - (height / 2))
       .attr("dy", "1em")
       .attr("class", "axisText")
-      .text("Has Healthcare (%)");
+      .text("Has Healthcare (%)")
+
 
     chartGroup.append("text")
       .attr("transform", `translate(${width / 2}, ${height + margin.top + 30})`)
